@@ -248,9 +248,33 @@ input, textarea, select {
     <div class="container">
         <header>
             <h1>Generador Consultas para TSR Soporte</h1>
-            <p class="subtitle">Sistema de gestión de plantillas para <a href="mailto:tsrdesoporte@mapfre.com" style="color: #E44E59; text-decoration: none;">tsrdesoporte@mapfre.com</a></p>
+            <p class="subtitle">Sistema de gestión de plantillas para <a href="/cdn-cgi/l/email-protection#5c282f2e38392f332c332e28391c313d2c3a2e39723f3331" style="color: #E44E59; text-decoration: none;"><span class="__cf_email__" data-cfemail="5c282f2e38392f332c332e28391c313d2c3a2e39723f3331">[email&#160;protected]</span></a> <button onclick="mostrarInstruccionesInstalar()" style="background: linear-gradient(135deg, #E44E59, #c73d47); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem; margin-left: 1rem;">Instalar</button></p>
+            
+            <!-- Buscador -->
+            <div style="margin-top: 1.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.2rem;">🔍</span>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Buscar por tipo gestión, descripción o plantilla..." 
+                        onkeyup="buscarPlantillas()"
+                        style="width: 100%; padding: 0.875rem 1rem 0.875rem 3rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; color: #ffffff; font-family: 'Outfit', sans-serif; font-size: 1rem; transition: all 0.3s ease;"
+                        onfocus="this.style.borderColor='#E44E59'"
+                        onblur="this.style.borderColor='var(--border-color)'"
+                    >
+                </div>
+                <p id="searchResults" style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem; min-height: 1.5rem;"></p>
+            </div>
         </header>
         <div class="grid" id="cardsContainer"></div>
+        
+        <!-- Aviso Legal -->
+        <div style="margin-top: 3rem; padding: 1.5rem; background: #ece79b; border: 3px solid #FF8C00; border-radius: 12px;">
+            <p style="color: #000000; margin: 0; font-size: 0.95rem; line-height: 1.6;">
+                <strong style="font-size: 1.1rem;">⚠️ AVISO LEGAL:</strong> Herramienta de apoyo de uso exclusivo para colaboradores, destinada a generar correos electrónicos guiados para agilizar la tramitación de solicitudes. No recopila datos ni interactúa con sistemas corporativos, por lo que su uso es seguro. No sustituye los canales oficiales. Ante cualquier duda, consulta con el departamento técnico.
+            </p>
+        </div>
     </div>
     <div id="modal" class="modal">
         <div class="modal-content">
@@ -261,7 +285,7 @@ input, textarea, select {
             <div id="modalBody"></div>
         </div>
     </div>
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const templates = [
     {
         id: 1,
@@ -623,7 +647,8 @@ function openModal(templateId) {
             field.options.forEach(opt => { formHTML += `<option value="${opt}">${opt}</option>`; });
             formHTML += `</select>`;
         } else {
-            formHTML += `<input type="${field.type}" class="form-input" name="${field.name}" ${field.required ? 'required' : ''}>`;
+            const minDate = field.type === 'date' ? ` min="${new Date().toISOString().split('T')[0]}"` : '';
+            formHTML += `<input type="${field.type}" class="form-input" name="${field.name}" ${field.required ? 'required' : ''}${minDate}>`;
         }
         formHTML += `</div>`;
     });
@@ -633,6 +658,73 @@ function openModal(templateId) {
 }
 
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+function buscarPlantillas() {
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.card');
+    const searchResults = document.getElementById('searchResults');
+    let visibleCount = 0;
+    
+    cards.forEach(card => {
+        const title = card.querySelector('.card-title').textContent.toLowerCase();
+        const description = card.querySelector('.card-description').textContent.toLowerCase();
+        
+        if (title.includes(searchInput) || description.includes(searchInput)) {
+            card.style.display = 'flex';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Mostrar contador de resultados
+    if (searchInput === '') {
+        searchResults.textContent = '';
+    } else if (visibleCount === 0) {
+        searchResults.textContent = '❌ No se encontraron plantillas';
+        searchResults.style.color = '#E44E59';
+    } else {
+        searchResults.textContent = `✓ ${visibleCount} plantilla${visibleCount !== 1 ? 's' : ''} encontrada${visibleCount !== 1 ? 's' : ''}`;
+        searchResults.style.color = '#4CAF50';
+    }
+}
+
+function mostrarInstruccionesInstalar() {
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    
+    modalTitle.textContent = '📱 Instalar la app';
+    
+    const appleSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#C0C0C0" style="vertical-align: middle; margin-right: 0.5rem;"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>';
+    
+    modalBody.innerHTML = `
+        <div style="font-size: 1rem; line-height: 2; color: #ffffff;">
+            <p style="margin-bottom: 1.5rem;">
+                <strong style="color: #4CAF50;">🤖 Android (Chrome)</strong><br>
+                Abre la URL → menú ⋮ → "Añadir a pantalla de inicio"
+            </p>
+            
+            <p style="margin-bottom: 1.5rem;">
+                <strong style="color: #FFFFFF;">${appleSvg}iOS (Safari)</strong><br>
+                Abre la URL → botón compartir <span style="font-size: 1.3rem;">□↑</span> → "Añadir a pantalla de inicio"
+            </p>
+            
+            <p style="margin-bottom: 1.5rem;">
+                <strong style="color: #00A4EF;">🖥️ PC (Chrome / Edge)</strong><br>
+                Abre la URL → icono ⊕ en la barra de direcciones → "Instalar"
+            </p>
+            
+            <hr style="border: none; border-top: 1px solid #404040; margin: 1.5rem 0;">
+            
+            <p style="margin: 0; color: #b8b8b8; font-size: 0.95rem;">
+                <strong>💡</strong> La app funciona sin conexión después de la primera carga
+            </p>
+        </div>
+    `;
+    
+    modal.style.display = 'flex';
+}
 
 function generateEmail(event, templateId) {
     event.preventDefault();
@@ -734,23 +826,4 @@ document.addEventListener('DOMContentLoaded', createCards);
 // Registro del Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(registration => {
-        console.log('Service Worker registrado correctamente:', registration.scope);
-      })
-      .catch(error => {
-        console.log('Error al registrar Service Worker:', error);
-      });
-  });
-}
-
-// Detectar si la app está instalada y mostrar prompt de instalación
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  console.log('App puede ser instalada');
-});
-</script>
-</body>
-</html>
+    navigator.serviceWorker.register('./sw
