@@ -1,197 +1,829 @@
 <!DOCTYPE html>
+<!--
+════════════════════════════════════════════════════════════════════════════════
+  MAPFRE - GENERADOR DE CONSULTAS TSR SOPORTE
+════════════════════════════════════════════════════════════════════════════════
+
+  COPYRIGHT © 2025 MAPFRE - TODOS LOS DERECHOS RESERVADOS
+  
+  AVISO LEGAL:
+  Este código es propiedad exclusiva de MAPFRE. Queda prohibida su copia,
+  modificación, distribución o uso sin autorización expresa por escrito.
+  
+  El uso no autorizado puede resultar en acciones legales.
+  
+════════════════════════════════════════════════════════════════════════════════
+-->
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-    
-    <!-- Iconos PWA -->
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-    <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Navegador de Gestiones TSR</title>
+    <title>Generador Consultas para TSR Soporte - MAPFRE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <link rel="apple-touch-icon" href="./icon-192x192.png">
+    <meta name="theme-color" content="#E4002B">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TSR Soporte">
+    <meta name="description" content="Generador de consultas para TSR Soporte MAPFRE">
+    <meta name="mobile-web-app-capable" content="yes">
     <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #2d2d2d;
+            --bg-card-hover: #363636;
+            --accent-primary: #E44E59;
+            --accent-secondary: #c73d47;
+            --accent-light: #f06570;
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8b8;
+            --border-color: #404040;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'DIN', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #E4E4E4; min-height: 100vh; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 30px; margin-bottom: 30px; }
-        .header-content { margin-bottom: 20px; display: flex; align-items: center; gap: 20px; }
-        .header-logo { height: 32px; width: auto; flex-shrink: 0; }
-        .header-text { flex: 1; }
-        .header-content h1 { color: #E4002B; font-size: 32px; margin-bottom: 5px; }
-        .header-content p { color: #666; font-size: 16px; }
-        .search-box { position: relative; }
-        .search-box input { width: 100%; padding: 15px 15px 15px 45px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; }
-        .search-box input:focus { outline: none; border-color: #E4002B; }
-        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #999; }
-        .gestiones-grid { display: grid; gap: 20px; }
-        .gestion-card { background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 25px; border-left: 5px solid #E4002B; cursor: pointer; transition: all 0.3s; }
-        .gestion-card:hover { box-shadow: 0 6px 12px rgba(0,0,0,0.15); transform: translateY(-2px); border-left-color: #b01804; }
-        .gestion-card h3 { color: #333; font-size: 20px; margin-bottom: 15px; }
-        .gestion-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
-        .badge { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; }
-        .badge-destinatario { background: #ffe5e0; color: #E4002B; }
-        .badge-docs { background: #e8f5e9; color: #388e3c; }
-        .gestion-card p { color: #666; line-height: 1.5; }
-        .detail-view { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 40px; }
-        .detail-header { border-bottom: 3px solid #E4002B; padding-bottom: 20px; margin-bottom: 30px; }
-        .detail-header h2 { color: #333; font-size: 28px; margin-bottom: 15px; }
-        .detail-header p { color: #666; font-size: 16px; line-height: 1.6; }
-        .back-button { background: #f5f5f5; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; margin-bottom: 20px; transition: background 0.3s; }
-        .back-button:hover { background: #e0e0e0; }
-        .docs-section h3 { color: #333; font-size: 22px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .doc-item { background: linear-gradient(135deg, #fff5f4 0%, #ffe5e0 100%); border: 2px solid #ffccc7; border-radius: 10px; padding: 18px; margin-bottom: 15px; transition: all 0.3s; }
-        .doc-item:hover { border-color: #E4002B; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .doc-content { display: flex; align-items: start; gap: 15px; }
-        .doc-number { background: #E4002B; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
-        .doc-button { background: #E4002B; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background 0.3s; font-size: 14px; text-decoration: none; display: inline-block; }
-        .doc-button:hover { background: #b01804; }
-        .doc-text { color: #333; flex: 1; line-height: 1.6; }
-        .hidden { display: none; }
-        .no-results { background: white; border-radius: 12px; padding: 60px; text-align: center; color: #999; font-size: 18px; }
-        .alert-text { color: #3366CC; font-weight: bold; margin-bottom: 15px; padding: 10px; background: #e6f0ff; border-radius: 5px; }
-        .form-group { margin: 15px 0; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
-        .form-group select, .form-group input[type="text"], .form-group input[type="date"] { width: 100%; padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 14px; }
-        .form-group select:focus, .form-group input[type="text"]:focus, .form-group input[type="date"]:focus { outline: none; border-color: #E4002B; }
-        .form-group textarea { width: 100%; padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 14px; font-family: inherit; resize: vertical; }
-        .form-group textarea:focus { outline: none; border-color: #E4002B; }
-
-
-        /* Responsive móvil - Header centrado */
-        @media (max-width: 480px) {
-            .header-content {
-                flex-direction: column !important;
-                text-align: center !important;
-                gap: 15px !important;
-            }
-            .header-logo {
-                height: 30px !important;
-                width: auto !important;
-                margin: 0 auto;
-            }
-            .header-text {
-                width: 100%;
-            }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 20% 30%, rgba(228, 78, 89, 0.06) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 70%, rgba(199, 61, 71, 0.05) 0%, transparent 50%);
         }
-        /* Responsive Styles */
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        header { text-align: center; margin-bottom: 3rem; padding: 2rem 0; border-bottom: 2px solid var(--border-color); position: relative; }
+        header::after {
+            content: ''; position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
+            width: 200px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+            animation: shimmer 3s infinite;
+        }
+        @keyframes shimmer { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        h1 {
+            font-size: 3rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-light));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 0.5rem; letter-spacing: -1px;
+        }
+        .subtitle { color: var(--text-secondary); font-size: 1.1rem; font-weight: 300; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;
+            padding: 1.5rem; transition: all 0.3s ease; position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            transform: scaleX(0); transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px); border-color: var(--accent-primary);
+            background: var(--bg-card-hover); box-shadow: 0 8px 24px rgba(228, 78, 89, 0.2);
+        }
+        .card:hover::before { transform: scaleX(1); }
+        .card-title {
+            font-size: 1.35rem; font-weight: 600; color: #ffffff;
+            margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;
+        }
+        .card-title::before { content: '◆'; font-size: 1rem; color: var(--accent-primary); }
+        .card-description { font-size: 1.05rem; color: #ffffff; margin-bottom: 1rem; line-height: 1.6; flex-grow: 1; }
+        .btn {
+            width: 100%; padding: 0.875rem 1.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: #ffffff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease; font-family: 'Outfit', sans-serif;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .btn-icon {
+            display: flex; align-items: center; justify-content: flex-start; gap: 1rem;
+            padding: 0.65rem 1.5rem;
+        }
+        .btn:hover {
+            transform: translateY(-2px); box-shadow: 0 6px 20px rgba(228, 78, 89, 0.4);
+            background: linear-gradient(135deg, var(--accent-light), var(--accent-primary));
+        }
+        .btn:active { transform: translateY(0); }
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 14, 26, 0.95); backdrop-filter: blur(10px);
+            z-index: 1000; animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--bg-card); border: 1px solid var(--accent-primary);
+            border-radius: 16px; padding: 2rem; max-width: 700px; width: 90%;
+            max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(228, 78, 89, 0.25);
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translate(-50%, -45%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);
+        }
+        .modal-title { font-size: 1.6rem; font-weight: 600; color: #ffffff; }
+        .close-btn {
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 1.5rem; cursor: pointer; transition: color 0.3s ease;
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+        }
+        .close-btn:hover { color: var(--accent-primary); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-label { display: block; margin-bottom: 0.5rem; color: #ffffff; font-weight: 500; font-size: 1rem; }
+        .form-input, .form-textarea {
+            width: 100%; padding: 0.875rem; background: var(--bg-secondary);
+            border: 1px solid var(--border-color); border-radius: 8px; color: #ffffff;
+            font-family: 'Outfit', sans-serif; font-size: 1rem; transition: all 0.3s ease;
+        }
+        .form-input option { background: var(--bg-secondary); color: #ffffff; padding: 0.5rem; }
+        .form-input:focus, .form-textarea:focus {
+            outline: none; border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(228, 78, 89, 0.15);
+        }
+        .form-textarea { min-height: 120px; resize: vertical; }
+        .email-preview {
+            background: var(--bg-secondary); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 1.5rem; margin-top: 1.5rem;
+            font-family: 'IBM Plex Mono', monospace; font-size: 0.95rem;
+            line-height: 1.8; color: #ffffff;
+        }
+        .email-preview strong { color: var(--accent-primary); }
+        .btn-secondary { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background: var(--bg-primary); border-color: var(--accent-primary); }
+        .button-group { display: flex; gap: 1rem; margin-top: 1.5rem; }
+        .button-group .btn { flex: 1; }
+        .info-banner {
+            background: linear-gradient(135deg, rgba(228, 78, 89, 0.12), rgba(199, 61, 71, 0.08));
+            border: 1px solid var(--accent-primary); border-radius: 8px; padding: 1rem;
+            margin-bottom: 1.5rem; font-size: 1rem; color: #ffffff;
+        }
+        .info-banner strong { color: var(--accent-primary); }
         @media (max-width: 768px) {
-            .container { padding: 15px; }
-            .header h1 { font-size: 22px; }
-            .search-box { margin: 15px 0; }
-            .gestion-card { padding: 15px; }
-            .gestion-card h3 { font-size: 16px; }
-            .detail-header h2 { font-size: 20px; }
-            .docs-section h3 { font-size: 16px; }
-            .form-group label { font-size: 14px; }
-            .form-group input, .form-group select, .form-group textarea { font-size: 14px; padding: 10px; }
-            .doc-button { font-size: 13px; padding: 10px 16px; }
-            .badge { font-size: 11px; padding: 4px 10px; }
-            .back-button { font-size: 13px; padding: 8px 16px; }
-            table { font-size: 12px; }
-            table th, table td { padding: 6px !important; font-size: 11px !important; }
-        }
-        
-        @media (max-width: 480px) {
-            .container { padding: 10px; }
-            .header h1 { font-size: 18px; }
-            .gestion-grid { grid-template-columns: 1fr; }
-            .gestion-card { padding: 12px; }
-            .gestion-card h3 { font-size: 15px; }
-            .detail-header h2 { font-size: 18px; }
-            .form-group { margin-bottom: 12px; }
-            .doc-item { flex-direction: column; align-items: stretch; }
-            .doc-content { flex-direction: column; }
-            .doc-number { margin-right: 0; margin-bottom: 8px; }
-            .doc-button { width: 100%; margin-top: 8px; }
-            table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .grid { grid-template-columns: 1fr; }
+            h1 { font-size: 2rem; }
+            .modal-content { width: 95%; padding: 1.5rem; }
+            .button-group { flex-direction: column; }
         }
     </style>
+
+<script>
+// Protección contra herramientas de desarrollo
+(function() {
+    // Deshabilitar F12, Ctrl+Shift+I, Ctrl+U
+    document.onkeydown = function(e) {
+        if(e.keyCode == 123 || // F12
+           (e.ctrlKey && e.shiftKey && e.keyCode == 73) || // Ctrl+Shift+I
+           (e.ctrlKey && e.shiftKey && e.keyCode == 74) || // Ctrl+Shift+J
+           (e.ctrlKey && e.keyCode == 85) || // Ctrl+U
+           (e.ctrlKey && e.keyCode == 83)) { // Ctrl+S
+            e.preventDefault();
+            return false;
+        }
+    };
+    
+    // Deshabilitar clic derecho
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // Detección de DevTools
+    var devtools = {isOpen: false, orientation: null};
+    var threshold = 160;
+    var checkDevTools = function() {
+        var widthThreshold = window.outerWidth - window.innerWidth > threshold;
+        var heightThreshold = window.outerHeight - window.innerHeight > threshold;
+        var orientation = widthThreshold ? 'vertical' : 'horizontal';
+        
+        if (!(heightThreshold && widthThreshold) &&
+            ((window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) || widthThreshold || heightThreshold)) {
+            if (!devtools.isOpen || devtools.orientation !== orientation) {
+                console.clear();
+            }
+            devtools.isOpen = true;
+            devtools.orientation = orientation;
+        } else {
+            devtools.isOpen = false;
+            devtools.orientation = null;
+        }
+    };
+    
+    setInterval(checkDevTools, 500);
+})();
+</script>
+
+<style>
+/* Protección contra selección de texto */
+* {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Permitir selección en formularios */
+input, textarea, select {
+    -webkit-user-select: text !important;
+    -khtml-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+}
+
+/* Protección contra impresión */
+@media print {
+    body { display: none; }
+}
+</style>
+
 </head>
 <body>
-
     <div class="container">
-        <div class="header">
-            <div class="header-content">
-                <img src="mapfre-isotipo.png" alt="MAPFRE" class="header-logo">
-                <div class="header-text">
-                    <h1>Navegador de Gestiones TSR</h1>
-                    <p>Te ayudamos a encontrar la ruta en tus tareas 😉</p>
+        <header>
+            <h1>Generador Consultas para TSR Soporte</h1>
+            <p class="subtitle">Sistema de gestión de plantillas para <a href="/cdn-cgi/l/email-protection#5c282f2e38392f332c332e28391c313d2c3a2e39723f3331" style="color: #E44E59; text-decoration: none;"><span class="__cf_email__" data-cfemail="5c282f2e38392f332c332e28391c313d2c3a2e39723f3331">[email&#160;protected]</span></a> <button onclick="mostrarInstruccionesInstalar()" style="background: linear-gradient(135deg, #E44E59, #c73d47); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem; margin-left: 1rem;">Instalar</button></p>
+            
+            <!-- Buscador -->
+            <div style="margin-top: 1.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.2rem;">🔍</span>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Buscar por tipo gestión, descripción o plantilla..." 
+                        onkeyup="buscarPlantillas()"
+                        style="width: 100%; padding: 0.875rem 1rem 0.875rem 3rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; color: #ffffff; font-family: 'Outfit', sans-serif; font-size: 1rem; transition: all 0.3s ease;"
+                        onfocus="this.style.borderColor='#E44E59'"
+                        onblur="this.style.borderColor='var(--border-color)'"
+                    >
                 </div>
+                <p id="searchResults" style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem; min-height: 1.5rem;"></p>
             </div>
-            <div class="search-box">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="searchInput" placeholder="Buscar por tipo de gestión, destinatario o descripción...">
-            </div>
+        </header>
+        <div class="grid" id="cardsContainer"></div>
+        
+        <!-- Aviso Legal -->
+        <div style="margin-top: 3rem; padding: 1.5rem; background: #FFA500; border: 3px solid #FF8C00; border-radius: 12px;">
+            <p style="color: #000000; margin: 0; font-size: 0.95rem; line-height: 1.6;">
+                <strong style="font-size: 1.1rem;">⚠️ AVISO LEGAL:</strong> Herramienta de apoyo de uso exclusivo para colaboradores, destinada a generar correos electrónicos guiados para agilizar la tramitación de solicitudes. No recopila datos ni interactúa con sistemas corporativos, por lo que su uso es seguro. No sustituye los canales oficiales. Ante cualquier duda, consulta con el departamento técnico.
+            </p>
         </div>
-        <div id="listView" class="gestiones-grid"></div>
-        <div id="detailView" class="hidden"></div>
-        <div id="noResults" class="no-results hidden">No se encontraron resultados</div>
     </div>
-    <script>
-const gestiones=[{id:1,tipo:"Gestión de Altas, Bajas y Contratos de Proveedores",destinatario:"Tsr de Soporte",descripcion:"Procedimiento gestión de contratos en nuevas incorporaciones y cambios de razón social",documentos:[{texto:"Gestión de Contratos de Colaboración Proveedores Patrimoniales",url:"https://mapfrecorp.sharepoint.com/sites/GO365SPOEECOMPUSGIBEES-PROVSERV/Proveedores%20Patrimoniales/Reparadores/Operativas/Gesti%C3%B3n%20de%20Contratos%20de%20Colaboraci%C3%B3n%20Proveedores%20Patrimoniales.docx"},{texto:"Plantilla de Solicitud Contrato de Alta Reparadores - Cambio razón social",url:"https://mapfrecorp.sharepoint.com/:x:/r/sites/GO365SPOEECOMPUSGIBEES-PROVSERV/Proveedores%20Patrimoniales/Reparadores/Plantillas/Solicitud%20Contrato,%20Alta%20Reparadores%20vJUL25.xlsx?d=wc8f4d9207a5f4ca9a703e359993a683d&csf=1&web=1&e=xV90Cf"},{texto:"Plantilla de Solicitud Baja Total Proveedor",url:"https://mapfrecorp.sharepoint.com/:w:/r/sites/GO365SPOEECOMPUSGIBEES-PROVSERV/Proveedores%20Patrimoniales/Reparadores/Plantillas/Resoluci%C3%B3n%20Contrato%20Proveedor.docx?d=w179afc2a308d4e969c4f9d4a5d7875e8&csf=1&web=1&e=RrSLLV"},{texto:"Plantilla Comunicación Baja Voluntaria Proveedor",url:"https://mapfrecorp.sharepoint.com/:w:/r/sites/GO365SPOEECOMPUSGIBEES-PROVSERV/Proveedores%20Patrimoniales/Reparadores/Plantillas/Comunicaci%C3%B3n%20Resoluci%C3%B3n%20Voluntaria%20Contrato%20Proveedor.docx?d=wf69ea18b8c664667ae053641a9c6e71b&csf=1&web=1&e=g2X1fO"},{texto:"Enviar solicitud a Soporte",url:"SPECIAL_FORM_1"}]},{id:2,tipo:"Gestiones Operativas - Cambios de guardia",destinatario:"Tsr de Soporte",descripcion:"Para cambios de guardia es imprescindible rellenar plantilla y revisar datos correctos de Nº Profesional / Zonas / Actividad. Evita en lo posible cambios por días, prioriza sustituciones por semana completa guardia. Traslada cuadrantes de guardias a tus profesionales con antelación. Revisa programación en bajas totales.",documentos:[{texto:"Formulario Cambio de Guardia",url:"SPECIAL_FORM_CAMBIO_GUARDIA"}]},{id:3,tipo:"Gestiones Operativas - Altas / bajas temporales",destinatario:"Tsr de Soporte",descripcion:"⚠️Presta atención en las comunicaciones con Proveedores – Laboralidad. Recuerda que el profesional puede solicitar esta gestión a Soporte, salvo que el motivo sea por indicaciones de TSR como incidencias, incumplimientos, etc. Especifica estos motivos en el correo a Soporte. No utilices este canal para las vacaciones estivales planificadas.",documentos:[{texto:"Formulario Alta/Baja Temporal",url:"SPECIAL_FORM_ALTA_BAJA"}]},{id:5,tipo:"Gestiones Operativas - Zonas / Preasignaciones / Actividades / Límites de trabajos / Festivos / Avisos Creación Servicios",destinatario:"Tsr de Soporte",descripcion:"En este bloque se solicitan gestiones relacionadas con modificaciones de zonas y/o actividades a profesionales así como las preasignaciones y límites que se requieren en la correcta asignación y distribución de servicios. La creación de zonas, asignación de códigos postales y cambios en distribución zonal se realizan al inicio año y para cualquier modificación debe remitirse a Beatriz Ruiz / Laura Gómiz.",documentos:[{texto:"Formulario de Gestión",url:"SPECIAL_FORM_PREASIGNACIONES"}]},{id:7,tipo:"Gestiones Operativas - Facturaciones - Modificaciones importes - Incidencias Tarifas",destinatario:"Tsr de Soporte",descripcion:"Adelantos de facturación (justificado), modificaciones de servicios mal facturados. Modificaciones o incidencias en aplicación de tarifas, en desplazamientos, guardias, bonus, desviaciones en tarifas.",documentos:[{texto:"Enviar correo a Soporte",url:"SPECIAL_FORM_TARIFAS"}]},{id:11,tipo:"Gestión Legal - Contratos - Embargos - Demandas - Accidentes - Incidencias",destinatario:"Tsr de Soporte",descripcion:"En este apartado puedes llevar a cabo gestiones y/o consultas vinculadas a la relación del proveedor con Mapfre como: solicitudes de los contratos de colaboración en vigor, estado de embargos, comunicación o consulta de incidencias graves con asegurados, accidentes, relaciones laborables, etc.",documentos:[{texto:"Enviar correo a Soporte",url:"SPECIAL_FORM_LEGAL"}]},{id:10,tipo:"Gestión Legal - Documentación CAE / PRL (6Conecta)",destinatario:"Tsr de Soporte",descripcion:"Dudas o incidencias en gestión documental CAE / PRL",documentos:[{texto:"GUÍA 6CONECTA",url:"https://mapfrecorp.sharepoint.com/sites/GO365EECOMPUSGIBEES-AREAPROVEPATRI/Documentos%20compartidos/Documentaci%C3%B3n%20compartida/6Conecta%20(PRL%20Y%20CAE)/GU%C3%8DA%206CONECTA%20PARA%20GESTI%C3%93N%20DOCUMENTACI%C3%93N%20MAPFRE.ppsx"},{texto:"Enviar correo a Soporte",url:"SPECIAL_FORM_DOCUMENTACION"}]},{id:12,tipo:"Imagen Corporativa - Rotulación - Ropa de Trabajo - Carnés",destinatario:"Tsr de Soporte",descripcion:"Recuerda que las rotulaciones es para vehículos blancos en buen estado, asegurados en Mapfre / Verti. Para la solicitud de carnés para empresa indica número con nombres de operarios y DNI.",documentos:[{texto:"Formulario Imagen Corporativa",url:"SPECIAL_FORM_IMAGEN"}]},{id:15,tipo:"Incidencias en Aplicaciones del Profesional",destinatario:"Tsr de Soporte",descripcion:"Consultas frecuentes Infocol. Comunicación de incidencias sin resolver en INFOCOL / APPCOL. Recuerda que es obligatorio que facilites nº incidencia SAU y en Appcol haber envío los logs para su seguimiento",documentos:[{texto:"Consultas frecuentes uso Infocol",url:"https://mapfrecorp.sharepoint.com/sites/GO365SPOEECOMPUSGIBEES-PROVSERV/Proveedores%20Patrimoniales/Reparadores/Operativas/Consultas%20Frecuentes%20Uso%20de%20Infocol.docx"},{texto:"Enviar correo a Soporte",url:"SPECIAL_FORM_APLICACIONES"}]},{id:16,tipo:"Formación de Proveedores",destinatario:"Rafael Rubio",descripcion:"Formación de Reciclaje para proveedor, indicando materia o carencia detectada",documentos:[{texto:"Formación Profesionales",url:"https://mapfrecorp.sharepoint.com/sites/GO365EECOMPUSGIBEES-AREAPROVEPATRI/Documentos%20compartidos/Documentaci%C3%B3n%20compartida/Formaci%C3%B3n/Formaci%C3%B3n%20Profesionales"},{texto:"Formación TSR",url:"https://mapfrecorp.sharepoint.com/sites/GO365EECOMPUSGIBEES-AREAPROVEPATRI/Documentos%20compartidos/Documentaci%C3%B3n%20compartida/Formaci%C3%B3n/Formaci%C3%B3n%20TSR%202025"},{texto:"Enviar correo a Rafael Rubio",url:"SPECIAL_FORM_FORMACION"}]},{id:17,tipo:"Consultas Red Comercial",destinatario:"Tsr de Soporte",descripcion:"Te adjuntamos una plantilla con indicaciones para que la puedas remitir al agente que precise intervención de Soporte. Recuerda informarle que por este canal exclusivamente se atienden cuestiones relacionadas con la red de proveedores.",documentos:[{texto:"Plantilla a enviar a agente",url:"SPECIAL_FORM_RED_COMERCIAL"}]},{id:18,tipo:"Incidencias Equipamiento Tecnológico SAU",destinatario:"SAU",descripcion:"Guía para restablecer contraseña y acceso al SAU para comunicar incidencias en tu puesto de trabajo y dispositivos móviles / PC",documentos:[{texto:"Guía para restablecer contraseña",url:"https://mapfre.tts-cloud.com/publisher/download/document/7p9dl53jo28e0omder4p7hww8/1.29?mimetype=application%2Fpdf&fileextension=pdf&externalwindow=true"},{texto:"Problema en dispositivo y/o móvil",url:"https://smaportal.mapfre.net/sm/ess/smOfferingPage?query=dispositivo%20m%C3%B3vil&entityId=WORK%20ENVIRONMENT_L1%23TELEPHONY_L2%23CONVERGENT%20TELEPHONY%20(ES)_L3%23INCIDENT%20ON%20DEVICE%20AND%2FOR%20MOBILE%20LINE%20(ES)_L4%23PROBLEM%20IN%20DEVICE%20AND%2FOR%20MOBILE%20LINE%20(ES)_L5_SUP&TENANTID=783319272"},{texto:"Problema en ordenador",url:"https://smaportal.mapfre.net/sm/ess/smOfferingPage?entityId=WORK%20ENVIRONMENT_L1%23IT%20EQUIPMENT_L2%23COMPUTER%20(DESKTOP)%20(ES)_L3%23COMPUTER%20(DESKTOP)%20(ES)_L4%23PROBLEM%20IN%20COMPUTER%20(PC,%20LAPTOP,THIN%20CLIENT)%20(ES)_L5_SUP&TENANTID=783319272"},{texto:"Portal SAU",url:"https://smaportal.mapfre.net/sm/ess?TENANTID=783319272"}]}];
-let currentView='list',filteredGestiones=[...gestiones];
-function renderList(){const e=document.getElementById("listView");e.innerHTML="",filteredGestiones.forEach(t=>{const o=document.createElement("div");o.className="gestion-card",o.onclick=()=>showDetail(t.id),o.innerHTML=`<h3>${t.tipo}</h3><div class="gestion-meta"><span class="badge badge-destinatario">👤 ${t.destinatario}</span><span class="badge badge-docs">📄 ${t.documentos.length} documento${1!==t.documentos.length?"s":""}</span></div><p>${t.descripcion}</p>`,e.appendChild(o)}),document.getElementById("noResults").classList.toggle("hidden",filteredGestiones.length>0)}
-function showDetail(e){const t=gestiones.find(t=>t.id===e),o=document.getElementById("detailView");let s=t.documentos.map((e,t)=>{if(e.url==="SPECIAL_FORM_1"){return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><div style="flex:1;"><div class="form-group"><label>Selecciona la opción:</label><select id="tipoSolicitud" onchange="updateSubject()"><option value="">-- Selecciona --</option><option value="Solicitud de Contrato de Alta Reparador">Solicitud de Contrato de Alta Reparador</option><option value="Solicitud Cambio Razón Social">Solicitud Cambio Razón Social</option><option value="Baja Total Reparador">Baja Total Reparador</option><option value="Baja voluntaria">Baja voluntaria</option></select></div><button class="doc-button" onclick="enviarFormulario()">✉️ Enviar correo</button></div></div></div>`;}if(e.url==="SPECIAL_FORM_ALTA_BAJA"){return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><div style="flex:1;"><div class="form-group"><label>Tipo de gestión:</label><select id="tipoGestion" onchange="toggleCamposAltaBaja()"><option value="">-- Selecciona opción --</option><option value="Alta">Alta</option><option value="Baja">Baja</option></select></div><div class="form-group" id="motivoBajaGroup" style="display:none;"><label>Motivo de baja:</label><select id="motivoBaja"><option value="">-- Selecciona Opción --</option><option value="Motivos Personales">Motivos Personales</option><option value="Vacaciones">Vacaciones</option><option value="Enfermedad / Accidente">Enfermedad / Accidente</option><option value="Saturación">Saturación</option><option value="Cambio Razón Social">Cambio Razón Social</option><option value="Sin Vehículo">Sin Vehículo</option><option value="Fin colaboración / Jubilación">Fin colaboración / Jubilación</option><option value="Indicaciones TSR Territorial">Indicaciones TSR Territorial</option></select></div><div class="form-group"><label>Nº Profesional:</label><input type="text" id="numProfesional" placeholder="Ej: 12345"></div><div class="form-group"><label>Fecha inicio:</label><input type="date" id="fechaInicio"></div><div class="form-group" id="fechaFinGroup" style="display:none;"><label>Fecha fin:</label><input type="date" id="fechaFin"></div><div class="form-group" id="sustitutoGroup" style="display:none;"><label>Nº Profesional Sustituto:</label><input type="text" id="sustituto" placeholder="Indica profesional/es sustituto/s"></div><button class="doc-button" onclick="enviarFormularioAltaBaja()">✉️ Enviar correo</button></div></div></div>`;}if(e.url==="SPECIAL_FORM_CAMBIO_GUARDIA"){return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><div style="flex:1;"><div id="tablaCambiosGuardia"><table style="width:100%;border-collapse:collapse;margin:15px 0;"><thead><tr><th style="border:1px solid #ccc;padding:8px;background:#f5f5f5;font-size:11px;">Profesionales actuales</th><th style="border:1px solid #ccc;padding:8px;background:#f5f5f5;font-size:11px;">Profesionales que van a sustituir al actual</th><th style="border:1px solid #ccc;padding:8px;background:#f5f5f5;font-size:11px;">Zonas de nivel</th><th style="border:1px solid #ccc;padding:8px;background:#f5f5f5;font-size:11px;">Prioridades de guardia en las zonas</th><th style="border:1px solid #ccc;padding:8px;background:#f5f5f5;font-size:11px;">Actividades de guardia</th><th style="border:1px solid #ccc;padding:8px;background:#f5f5f5;font-size:11px;">Fecha desde cuando se solicita el cambio</th><th style="border:1px solid #ccc;padding:8px;background:#f5f5f5;font-size:11px;">Fecha hasta la que se solicita el cambio</th></tr></thead><tbody id="filasTabla"><tr><td style="border:1px solid #ccc;padding:5px;"><input type="text" style="width:100%;border:none;padding:4px;" placeholder="XXXXX"></td><td style="border:1px solid #ccc;padding:5px;"><input type="text" style="width:100%;border:none;padding:4px;" placeholder="XXXXX"></td><td style="border:1px solid #ccc;padding:5px;"><input type="text" style="width:100%;border:none;padding:4px;" placeholder="XX"></td><td style="border:1px solid #ccc;padding:5px;"><input type="text" style="width:100%;border:none;padding:4px;" placeholder="X"></td><td style="border:1px solid #ccc;padding:5px;"><input type="text" style="width:100%;border:none;padding:4px;" placeholder="XX"></td><td style="border:1px solid #ccc;padding:5px;"><input type="text" style="width:100%;border:none;padding:4px;" placeholder="DD/MM/YY"></td><td style="border:1px solid #ccc;padding:5px;"><input type="text" style="width:100%;border:none;padding:4px;" placeholder="DD/MM/YY"></td></tr></tbody></table></div><button class="doc-button" onclick="agregarFilaGuardia()" style="margin-right:10px;">➕ Agregar fila</button><button class="doc-button" onclick="enviarFormularioCambioGuardia()">✉️ Enviar correo</button></div></div></div>`;}if(e.url==="SPECIAL_FORM_PREASIGNACIONES"){return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><div style="flex:1;"><div class="form-group"><label>Tipo de gestión (puedes seleccionar varias):</label><select id="tipoGestionPreasig" multiple style="height:120px;padding:8px;"><option value="Gestión en zonas / actividades">Gestión en zonas / actividades</option><option value="Preasignaciones a Profesional">Preasignaciones a Profesional</option><option value="Límites">Límites</option><option value="Festivos">Festivos</option><option value="Avisos - Carteles a la creación servicios">Avisos - Carteles a la creación servicios</option><option value="Otros">Otros</option></select><small style="color:#666;display:block;margin-top:5px;">Mantén Ctrl (o Cmd en Mac) para seleccionar múltiples opciones</small></div><div class="form-group"><label>Describe la gestión con zonas, profesionales, actividades y/o marcas:</label><textarea id="descripcionGestion" rows="4" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:5px;font-size:14px;font-family:inherit;" placeholder="Describe aquí los detalles de la gestión..."></textarea></div><div class="form-group"><label>Fecha a implantar:</label><input type="date" id="fechaImplantar"></div><button class="doc-button" onclick="enviarFormularioPreasignaciones()">✉️ Enviar correo</button></div></div></div>`;}if(e.url==="SPECIAL_FORM_VACACIONES"){return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><div style="flex:1;"><div class="form-group"><label>Nº Profesional:</label><input type="text" id="numProfVacaciones" placeholder="Ej: 12345"></div><div class="form-group"><label>Fecha inicio:</label><input type="date" id="fechaInicioVacaciones"></div><div class="form-group"><label>Fecha fin:</label><input type="date" id="fechaFinVacaciones"></div><div class="form-group"><label>Nº Profesional Sustituto:</label><input type="text" id="sustitutoVacaciones" placeholder="Indica profesional/es sustituto/s"></div><div class="form-group"><label>Zonas:</label><input type="text" id="zonasVacaciones" placeholder="Ej: Zona 1, Zona 2"></div><div class="form-group"><label>Otra información relevante:</label><textarea id="infoRelevante" rows="3" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:5px;font-size:14px;font-family:inherit;" placeholder="Información adicional..."></textarea></div><button class="doc-button" onclick="enviarFormularioVacaciones()">✉️ Enviar correo</button></div></div></div>`;}if(e.url==="SPECIAL_FORM_TARIFAS"){return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><div style="flex:1;"><div class="form-group"><label>Tipo de gestión (puedes seleccionar varias):</label><select id="tipoGestionTarifas" multiple style="height:auto;padding:8px;"><option value="Adelanto facturación">Adelanto facturación</option><option value="Modificación importes">Modificación importes</option><option value="Incidencias en códigos de tarifa, desplazamientos, guardias, bonus">Incidencias en códigos de tarifa, desplazamientos, guardias, bonus</option><option value="Desviaciones tarifa">Desviaciones tarifa</option><option value="Otros">Otros</option></select><small style="color:#666;display:block;margin-top:5px;">Mantén Ctrl (o Cmd en Mac) para seleccionar múltiples opciones</small></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;"><div class="form-group"><label>Nº Profesional/es:</label><input type="text" id="numProfTarifas" placeholder="Ej: 12345, 67890"></div><div class="form-group"><label>Zona:</label><input type="text" id="zonaTarifas" placeholder="Ej: Zona 1"></div></div><div class="form-group"><label>Información relevante:</label><textarea id="infoTarifas" rows="6" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:5px;font-size:14px;font-family:inherit;" placeholder="Describe aquí la información relevante..."></textarea></div><button class="doc-button" onclick="enviarFormularioTarifas()">✉️ Enviar correo</button></div></div></div>`;}if(e.url==="SPECIAL_FORM_MODIFICACIONES"){return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><div style="flex:1;"><div class="form-group"><label>Nº Profesional:</label><input type="text" id="numProfModif" placeholder="Ej: 12345"></div><div class="form-group"><label>Tipo de modificación (puedes seleccionar varias):</label><select id="tipoModificacion" multiple style="height:auto;padding:8px;"><option value="Personas / Dirección contacto">Personas / Dirección contacto</option><option value="Teléfonos">Teléfonos</option><option value="Email">Email</option><option value="Cuenta Bancaria (imprescindible certificado titularidad)">Cuenta Bancaria (imprescindible certificado titularidad)</option></select><small style="color:#666;display:block;margin-top:5px;">Mantén Ctrl (o Cmd en Mac) para seleccionar múltiples opciones</small></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;"><div class="form-group"><label>Si los cambios son temporales - Fecha desde:</label><input type="date" id="fechaDesdeModif"></div><div class="form-group"><label>Fecha hasta:</label><input type="date" id="fechaHastaModif"></div></div><div class="form-group"><label>Nuevos Datos:</label><textarea id="nuevosDatos" rows="6" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:5px;font-size:14px;font-family:inherit;" placeholder="Describe aquí los nuevos datos..."></textarea></div><button class="doc-button" onclick="enviarFormularioModificaciones()">✉️ Enviar correo</button></div></div></div>`;}if(e.url==="SPECIAL_FORM_IMAGEN"){return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><div style="flex:1;"><div class="form-group"><label>Nº Profesional:</label><input type="text" id="numProfImagen" placeholder="Ej: 12345"></div><div class="form-group"><label>Selecciona el tipo de gestión:</label><select id="tipoImagen" onchange="toggleOpcionesImagen()"><option value="">-- Selecciona opción --</option><option value="Rotulación">Rotulación</option><option value="Ropa de Trabajo">Ropa de Trabajo</option><option value="Carnés">Carnés</option></select></div><div id="opcionesRotulacion" style="display:none;"><div class="doc-item" style="margin:10px 0;"><div class="doc-content"><div class="doc-number">1</div><span class="doc-text">Plantilla Solicitud rotulación</span><a href="https://mapfrecorp.sharepoint.com/:x:/r/sites/GO365SPOEECOMPUSGIBEES-PROVSERV/Proveedores%20Patrimoniales/Reparadores/Plantillas/Rotulaci%C3%B3n%20vMAR25.xlsm?d=w846c3835904a4cff9683229f78a8560c&csf=1&web=1&e=KeNULL" target="_blank" class="doc-button">📄 Abrir</a></div></div><div class="doc-item" style="margin:10px 0;"><div class="doc-content"><div class="doc-number">2</div><span class="doc-text">Contacto Talleres Rotulación</span><a href="https://mapfrecorp.sharepoint.com/:x:/r/sites/GO365SPOEECOMPUSGIBEES-PROVSERV/Proveedores%20Patrimoniales/Reparadores/Plantillas/Contacto%20y%20Direcciones%20de%20Talleres%20para%20Rotulaci%C3%B3n%20Furgonetas.xls?d=w5028c5d8d0a74609bc788c52b14de60e&csf=1&web=1&e=l0apoG" target="_blank" class="doc-button">📄 Abrir</a></div></div><div class="form-group"><label>Matrícula/s:</label><input type="text" id="matriculas" placeholder="Ej: 1234ABC, 5678DEF"></div></div><div id="opcionesRopa" style="display:none;"><div class="doc-item" style="margin:10px 0;"><div class="doc-content"><div class="doc-number">1</div><span class="doc-text">Programa de Fidelización y Calidad</span><a href="https://mapfrecorp.sharepoint.com/:w:/r/sites/GO365SPOEECOMPUSGIBEES-PROVSERV/Proveedores%20Patrimoniales/Reparadores/Operativas/Programa%20Fidelizaci%C3%B3n%20y%20Calidad.docx?d=w47b7e9cfd5ab4a06adf65a18a75f0516&csf=1&web=1&e=1b5hq1" target="_blank" class="doc-button">📄 Abrir</a></div></div><div class="doc-item" style="margin:10px 0;"><div class="doc-content"><div class="doc-number">2</div><span class="doc-text">Manual programa de fidelización</span><a href="https://mapfrecorp.sharepoint.com/:w:/r/sites/GO365SPOEECOMPUSGIBEES-PROVSERV/Proveedores%20Patrimoniales/Reparadores/Operativas/Manual%20aplicaci%C3%B3n%20programa%20de%20fidelizaci%C3%B3n.docx?d=w14591a8949404589b4a21180fa5a7a76&csf=1&web=1&e=usEqkQ" target="_blank" class="doc-button">📄 Abrir</a></div></div><div class="doc-item" style="margin:10px 0;"><div class="doc-content"><div class="doc-number">3</div><span class="doc-text">Catálogo de prendas</span><a href="https://mapfrecorp.sharepoint.com/:w:/r/sites/GO365SPOEECOMPUSGIBEES-PROVSERV/Proveedores%20Patrimoniales/Reparadores/Plantillas/Cat%C3%A1logo%20de%20prendas%20Proveedores%20Patrimoniales.docx?d=w45532dfcbf674508811c44fca277e642&csf=1&web=1&e=zduT21" target="_blank" class="doc-button">📄 Abrir</a></div></div><div class="doc-item" style="margin:10px 0;"><div class="doc-content"><div class="doc-number">4</div><span class="doc-text">Cómo realizar tu compra</span><a href="https://mapfrecorp.sharepoint.com/:w:/r/sites/GO365SPOEECOMPUSGIBEES-PROVSERV/Proveedores%20Patrimoniales/Reparadores/Operativas/Ropa%20de%20trabajo.%20C%C3%B3mo%20realizar%20tu%20compra.docx?d=w10f43b3aebd144488c57587539946a02&csf=1&web=1&e=vRoifl" target="_blank" class="doc-button">📄 Abrir</a></div></div><div class="form-group"><label>Describe la consulta:</label><textarea id="consultaRopa" rows="4" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:5px;font-size:14px;font-family:inherit;" placeholder="Describe tu consulta..."></textarea></div></div><div id="opcionesCarnes" style="display:none;"><div class="form-group"><label>Para empresas detalla la cantidad, nombre y DNI de los técnicos:</label><textarea id="detallesCarnes" rows="6" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:5px;font-size:14px;font-family:inherit;" placeholder="Cantidad, nombres y DNI..."></textarea></div></div><button class="doc-button" onclick="enviarFormularioImagen()">✉️ Enviar correo</button></div></div></div>`;}if(e.url==="SPECIAL_FORM_DOCUMENTACION"){return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><div style="flex:1;"><div class="form-group"><label>Nº Profesional / NIF (si procede):</label><input type="text" id="numProfDoc" placeholder="Ej: 12345 o NIF"></div><div class="form-group"><label>Tipo de consulta:</label><select id="tipoConsultaDoc"><option value="">-- Selecciona opción --</option><option value="Problema de acceso">Problema de acceso</option><option value="Enviar guía / video">Enviar guía / video</option><option value="Duda uso">Duda uso</option><option value="Validación / rechazo documentación">Validación / rechazo documentación</option><option value="Otras consultas">Otras consultas</option></select></div><div class="form-group"><label>Detalla consulta / incidencia:</label><textarea id="detalleDoc" rows="6" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:5px;font-size:14px;font-family:inherit;" placeholder="Describe aquí la consulta o incidencia..."></textarea></div><button class="doc-button" onclick="enviarFormularioDocumentacion()">✉️ Enviar correo</button></div></div></div>`;}if(e.url==="SPECIAL_FORM_LEGAL"){return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><div style="flex:1;"><div class="form-group"><label>Describe solicitud o incidencia aportando cuantos datos sean necesarios para la gestión:</label><textarea id="detalleLegal" rows="8" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:5px;font-size:14px;font-family:inherit;" placeholder="Describe aquí la solicitud o incidencia con todos los detalles necesarios..."></textarea></div><button class="doc-button" onclick="enviarFormularioLegal()">✉️ Enviar correo</button></div></div></div>`;}if(e.url==="SPECIAL_FORM_APLICACIONES"){return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><div style="flex:1;"><div class="form-group"><label>Nº Profesional (si aplica):</label><input type="text" id="numProfApp" placeholder="Ej: 12345"></div><div class="form-group"><label>Descripción incidencia:</label><textarea id="descripcionApp" rows="6" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:5px;font-size:14px;font-family:inherit;" placeholder="Describe aquí la incidencia..."></textarea></div><button class="doc-button" onclick="enviarFormularioAplicaciones()">✉️ Enviar correo</button></div></div></div>`;}if(e.url==="SPECIAL_FORM_FORMACION"){return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><div style="flex:1;"><div class="form-group"><label>Nº Profesional/es:</label><input type="text" id="numProfForm" placeholder="Ej: 12345, 67890"></div><div class="form-group"><label>Describe necesidades, disponibilidad y cuantos detalles sean de interés:</label><textarea id="detallesForm" rows="6" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:5px;font-size:14px;font-family:inherit;" placeholder="Describe aquí las necesidades y detalles..."></textarea></div><button class="doc-button" onclick="enviarFormularioFormacion()">✉️ Enviar correo</button></div></div></div>`;}if(e.url==="SPECIAL_FORM_RED_COMERCIAL"){return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><div style="flex:1;"><div style="background:#fff3cd;border:2px solid #ffc107;border-radius:8px;padding:15px;margin-bottom:15px;"><h4 style="color:#856404;margin-bottom:10px;">ℹ️ INFORMACIÓN RELEVANTE:</h4><p style="color:#856404;margin:5px 0;font-size:13px;">Este canal es exclusivo para consultas o incidencias que relacionadas con la intervención de proveedores patrimoniales.</p><p style="color:#856404;margin:5px 0;font-size:13px;">Evita duplicar gestiones. No envíes correos si recientemente has reclamado a través de GESCOM.</p><p style="color:#856404;margin:5px 0;font-size:13px;">En correos a Soporte no incluyas a otros destinatarios en el PARA.</p><p style="color:#856404;margin:5px 0;font-size:13px;">No incluyas a Soporte en CC</p><p style="color:#856404;margin:5px 0;font-size:13px;">No envíes correos a Soporte correos meramente informativos o incluyas en hilos de correos gestionados por otros.</p><p style="color:#856404;margin:5px 0;font-size:13px;font-weight:bold;">Mantén en el asunto automático del correo "RED COMERCIAL - Número de expediente</p></div><button class="doc-button" onclick="enviarFormularioRedComercial()">✉️ Abrir correo</button></div></div></div>`;}if(e.url){let o=e.texto;if(e.url.startsWith("mailto:"))return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><span class="doc-text">${o}</span><a href="${e.url}" class="doc-button">✉️ Abrir correo</a></div></div>`;if(e.texto.includes(".doc")||e.texto.includes(".xls")||e.texto.includes(".msg")){const t=e.texto.split("/");o=t[t.length-1].split("?")[0]}return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><span class="doc-text">${o}</span><a href="${e.url}" target="_blank" class="doc-button">📄 Abrir</a></div></div>`}return`<div class="doc-item"><div class="doc-content"><div class="doc-number">${t+1}</div><span class="doc-text">${e.texto}</span></div></div>`}).join("");o.innerHTML=`<button class="back-button" onclick="showList()">← Volver al índice</button><div class="detail-header"><h2>${t.tipo}</h2><div class="gestion-meta" style="margin-bottom: 15px;"><span class="badge badge-destinatario">👤 ${t.destinatario}</span></div><p>${t.descripcion}</p></div><div class="docs-section"><h3>📄 Documentación Asociada</h3>${s}</div>`,document.getElementById("listView").classList.add("hidden"),document.getElementById("detailView").classList.remove("hidden"),document.getElementById("noResults").classList.add("hidden"),currentView="detail"}
-function enviarFormulario(){const sel=document.getElementById("tipoSolicitud");if(!sel||sel.value===""){alert("Por favor, selecciona una opción antes de enviar el correo.");return}const subject=encodeURIComponent(sel.value);const bodyText="Buenos días,\n\n"+sel.value+"\n\nRecuerda que debes de adjuntar plantilla correspondiente a la petición. Para ceses actividad no olvides revisar cuadrante anual de guardias, preasignaciones a eliminar, servicios pendientes y facturación (deudas).\n\n\n\nUn saludo";const body=encodeURIComponent(bodyText);window.location.href=`mailto:tsrdesoporte@mapfre.com?subject=${subject}&body=${body}`}
-function formatearFecha(fechaISO){if(!fechaISO)return "";const[year,month,day]=fechaISO.split("-");const yearShort=year.substring(2);return `${day}/${month}/${yearShort}`}
-function toggleCamposAltaBaja(){const tipoGestion=document.getElementById("tipoGestion");const motivoBajaGroup=document.getElementById("motivoBajaGroup");const fechaFinGroup=document.getElementById("fechaFinGroup");const sustitutoGroup=document.getElementById("sustitutoGroup");if(tipoGestion&&motivoBajaGroup&&fechaFinGroup&&sustitutoGroup){if(tipoGestion.value==="Baja"){motivoBajaGroup.style.display="block";fechaFinGroup.style.display="block";sustitutoGroup.style.display="block"}else if(tipoGestion.value==="Alta"){motivoBajaGroup.style.display="none";fechaFinGroup.style.display="none";sustitutoGroup.style.display="none"}else{motivoBajaGroup.style.display="none";fechaFinGroup.style.display="none";sustitutoGroup.style.display="none"}}}
-function enviarFormularioAltaBaja(){const tipoGestion=document.getElementById("tipoGestion")?.value;const motivoBaja=document.getElementById("motivoBaja")?.value;const numProfesional=document.getElementById("numProfesional")?.value;const fechaInicio=document.getElementById("fechaInicio")?.value;const fechaFin=document.getElementById("fechaFin")?.value;const sustituto=document.getElementById("sustituto")?.value;if(!tipoGestion){alert("Por favor, selecciona el tipo de gestión (Alta o Baja).");return}if(!numProfesional||!numProfesional.trim()){alert("Por favor, completa el campo Nº Profesional.");return}if(!fechaInicio){alert("Por favor, completa el campo Fecha inicio.");return}if(tipoGestion==="Baja"){if(!motivoBaja){alert("Por favor, selecciona el motivo de baja.");return}if(!fechaFin){alert("Por favor, completa el campo Fecha fin.");return}if(!sustituto||!sustituto.trim()){alert("Por favor, completa el campo Nº Profesional Sustituto.");return}}const motivoFinal=tipoGestion==="Baja"?motivoBaja:"Alta";const fechaInicioFormateada=formatearFecha(fechaInicio);const fechaFinFormateada=fechaFin?formatearFecha(fechaFin):"N/A";const subjectText=`${tipoGestion} - ${fechaInicioFormateada} - Nº ${numProfesional}`;const subject=encodeURIComponent(subjectText);let bodyText=`Buenos días,\n\nRecuerda que los días de alta y baja han de ser laborables. Revisa los cuadrantes de guardia y planifica si no hay fecha prevista de incorporación. Informa al profesional que causa baja que actualice sus servicios pendientes e indica si hay que hacer gestiones para reasignarlos. Informa a los sustitutos.\n\nNo Profesional: ${numProfesional}\nFecha inicio: ${fechaInicioFormateada}\n`;if(tipoGestion==="Baja"){bodyText+=`Fecha fin: ${fechaFinFormateada}\nMotivo: ${motivoFinal}\nNº Profesional Sustituto: ${sustituto}\n`}bodyText+=`\nInforma aquí de otros datos de interés como los motivos por los que le inhabilitas, gestiones a realizar en actividades, zonas, guardias...\n\nUn saludo`;const body=encodeURIComponent(bodyText);window.location.href=`mailto:tsrdesoporte@mapfre.com?subject=${subject}&body=${body}`}
-function agregarFilaGuardia(){const tbody=document.getElementById("filasTabla");const nuevaFila=document.createElement("tr");nuevaFila.innerHTML=`<td style="border:1px solid #ccc;padding:5px;"><input type="text" style="width:100%;border:none;padding:4px;" placeholder="XXXXX"></td><td style="border:1px solid #ccc;padding:5px;"><input type="text" style="width:100%;border:none;padding:4px;" placeholder="XXXXX"></td><td style="border:1px solid #ccc;padding:5px;"><input type="text" style="width:100%;border:none;padding:4px;" placeholder="XX"></td><td style="border:1px solid #ccc;padding:5px;"><input type="text" style="width:100%;border:none;padding:4px;" placeholder="X"></td><td style="border:1px solid #ccc;padding:5px;"><input type="text" style="width:100%;border:none;padding:4px;" placeholder="XX"></td><td style="border:1px solid #ccc;padding:5px;"><input type="text" style="width:100%;border:none;padding:4px;" placeholder="DD/MM/YY"></td><td style="border:1px solid #ccc;padding:5px;"><input type="text" style="width:100%;border:none;padding:4px;" placeholder="DD/MM/YY"></td>`;tbody.appendChild(nuevaFila)}
-function enviarFormularioCambioGuardia(){const filas=document.getElementById("filasTabla").getElementsByTagName("tr");if(filas.length===0){alert("Por favor, completa al menos una fila de la tabla.");return}const primeraFila=filas[0].getElementsByTagName("input");const fechaDesde=primeraFila[5].value||"";const actividad=primeraFila[4].value||"";let tablaTexto="Profesionales actuales | Profesionales que van a sustituir al actual | Zonas de nivel | Prioridades de guardia en las zonas | Actividades de guardia | Fecha desde cuando se solicita el cambio | Fecha hasta la que se solicita el cambio\n";for(let i=0;i<filas.length;i++){const inputs=filas[i].getElementsByTagName("input");const fila=[];for(let j=0;j<inputs.length;j++){fila.push(inputs[j].value||inputs[j].placeholder)}tablaTexto+=fila.join(" | ")+"\n"}const subjectText=`CAMBIO DE GUARDIA - ${fechaDesde} / ${actividad}`;const subject=encodeURIComponent(subjectText);const bodyText=`Buenos días,\nPor favor, ruego realicéis el siguiente cambio de guardia:\n\n${tablaTexto}\n* Se deberá rellenar una fila por cada cambio solicitado.\n* Si el profesional sustituto realiza la guardia de varias actividades, hay que indicar todas las afectadas.\n* Si el profesional sustituto realiza la guardia de varias zonas, hay que indicar todas las afectadas.\n* Si el profesional a sustituir realiza la guardia de varias prioridades, hay que indicar todas las afectadas.\n* Preferiblemente el profesional sustituto deberá asumir la guardia de la semana completa. Solo se realizarán cambios parciales en casos excepcionales.\n* Si se solicita un cambio de guardia que implique varias zonas, el profesional sustituto tiene que asumir las mismas zonas que el profesional saliente.\n* Toda aquella solicitud que no se reciba correctamente, no será gestionada y será devuelta con copia al JSR o Coordinador de Soporte, según corresponda, solicitando el envío de la plantilla o la información que falte\n* Siempre que se dé baja TOTAL o TEMPORAL a un profesional, se deberá revisar si dicho profesional pudiese estar de guardia durante todo el periodo que afecte para gestionar su sustitución.\n\nUn saludo`;const body=encodeURIComponent(bodyText);window.location.href=`mailto:tsrdesoporte@mapfre.com?subject=${subject}&body=${body}`}
-function enviarFormularioPreasignaciones(){const selectElement=document.getElementById("tipoGestionPreasig");const selectedOptions=Array.from(selectElement.selectedOptions).map(opt=>opt.value).filter(val=>val!=="");const descripcion=document.getElementById("descripcionGestion")?.value;const fechaImplantar=document.getElementById("fechaImplantar")?.value;if(selectedOptions.length===0){alert("Por favor, selecciona al menos un tipo de gestión.");return}if(!descripcion||descripcion.trim()===""){alert("Por favor, describe la gestión.");return}const tipoGestion=selectedOptions.join(" / ");const fechaFormateada=fechaImplantar?formatearFecha(fechaImplantar):"Sin fecha especificada";const subjectText=`${tipoGestion} - ${fechaFormateada}`;const subject=encodeURIComponent(subjectText);const bodyText=`Buenos días,\n\nRecuerda revisar datos de profesionales, zonas, códigos postales, actividades a poner/quitar y si están sujetas a periodos vacacionales, marcas y cuantos datos sean necesarios para llevar a cabo la gestión.\nInforma con suficiente de los festivos de tus zonas. Recuerda que deben afectar como mínimo a un nivel 1 de zona.\nEn los avisos / carteles indicando que nos presta servicio en una actividad o departamento recuerda que ha de estar informado tu JPP/CSR y que son medidas temporales.\n\n${descripcion}\n\nUn saludo`;const body=encodeURIComponent(bodyText);window.location.href=`mailto:tsrdesoporte@mapfre.com?subject=${subject}&body=${body}`}
-function enviarFormularioVacaciones(){const numProf=document.getElementById("numProfVacaciones")?.value;const fechaInicio=document.getElementById("fechaInicioVacaciones")?.value;const fechaFin=document.getElementById("fechaFinVacaciones")?.value;const sustituto=document.getElementById("sustitutoVacaciones")?.value;const zonas=document.getElementById("zonasVacaciones")?.value;const infoRelevante=document.getElementById("infoRelevante")?.value;if(!numProf||!numProf.trim()){alert("Por favor, completa el campo Nº Profesional.");return}if(!fechaInicio){alert("Por favor, completa el campo Fecha inicio.");return}if(!fechaFin){alert("Por favor, completa el campo Fecha fin.");return}if(!sustituto||!sustituto.trim()){alert("Por favor, completa el campo Nº Profesional Sustituto.");return}if(!zonas||!zonas.trim()){alert("Por favor, completa el campo Zonas.");return}if(!infoRelevante||!infoRelevante.trim()){alert("Por favor, completa el campo Otra información relevante.");return}const fechaInicioFormateada=formatearFecha(fechaInicio);const fechaFinFormateada=formatearFecha(fechaFin);const subjectText=`CESE TEMPORAL ACTIVIDAD - ${numProf} - ${fechaInicioFormateada}`;const subject=encodeURIComponent(subjectText);const bodyText=`⚠️Presta atención en las comunicaciones con Proveedores – Laboralidad. Peticiones fuera de las vacaciones estivales planificadas.\n\nRecuerda al profesional que debe actualizar el estado de sus servicios e informar a los asegurados. Informa a todos los profesionales sustitutos.\n\nBuenos días,\n\nNº Profesional: ${numProf}\nFecha inicio: ${fechaInicioFormateada}\nFecha fin: ${fechaFinFormateada}\nNº Profesional Sustituto: ${sustituto}\nZonas: ${zonas}\nOtra información relevante: ${infoRelevante}\n\nUn saludo`;const body=encodeURIComponent(bodyText);window.location.href=`mailto:tsrdesoporte@mapfre.com?subject=${subject}&body=${body}`}
-function enviarFormularioTarifas(){const selectElement=document.getElementById("tipoGestionTarifas");const selectedOptions=Array.from(selectElement.selectedOptions).map(opt=>opt.value).filter(val=>val!=="");const numProf=document.getElementById("numProfTarifas")?.value;const zona=document.getElementById("zonaTarifas")?.value;const info=document.getElementById("infoTarifas")?.value;if(selectedOptions.length===0){alert("Por favor, selecciona al menos un tipo de gestión.");return}if(!numProf||!numProf.trim()){alert("Por favor, completa el campo Nº Profesional/es.");return}if(!zona||!zona.trim()){alert("Por favor, completa el campo Zona.");return}if(!info||!info.trim()){alert("Por favor, completa el campo Información relevante.");return}const tipoGestion=selectedOptions.join(" / ");const subjectText=`${tipoGestion} - ${numProf}`;const subject=encodeURIComponent(subjectText);const bodyText=`Buenos días,\n\nSi la gestión implica a varios profesionales / expedientes adjunta datos en un archivo excel.\n\nNº Profesional/es: ${numProf}\nZona: ${zona}\n\n${info}\n\nUn saludo`;const body=encodeURIComponent(bodyText);window.location.href=`mailto:tsrdesoporte@mapfre.com?subject=${subject}&body=${body}`}
-function enviarFormularioModificaciones(){const numProf=document.getElementById("numProfModif")?.value;const selectElement=document.getElementById("tipoModificacion");const selectedOptions=Array.from(selectElement.selectedOptions).map(opt=>opt.value).filter(val=>val!=="");const fechaDesde=document.getElementById("fechaDesdeModif")?.value;const fechaHasta=document.getElementById("fechaHastaModif")?.value;const nuevosDatos=document.getElementById("nuevosDatos")?.value;if(!numProf||!numProf.trim()){alert("Por favor, completa el campo Nº Profesional.");return}if(selectedOptions.length===0){alert("Por favor, selecciona al menos un tipo de modificación.");return}if(!nuevosDatos||!nuevosDatos.trim()){alert("Por favor, completa el campo Nuevos Datos.");return}const tipoModif=selectedOptions.join(" / ");const subjectText=`${numProf} - ${tipoModif}`;const subject=encodeURIComponent(subjectText);let bodyText=`Buenos días,\n\nRecuerda que para cambios de cuenta corriente es imprescindible que adjuntes certificado de titularidad.\n\nNº Profesional: ${numProf}\nTipo de modificación: ${tipoModif}\n`;if(fechaDesde||fechaHasta){const fechaDesdeFormat=fechaDesde?formatearFecha(fechaDesde):"";const fechaHastaFormat=fechaHasta?formatearFecha(fechaHasta):"";bodyText+=`Cambios temporales:\nFecha desde: ${fechaDesdeFormat}\nFecha hasta: ${fechaHastaFormat}\n`}bodyText+=`\nNuevos Datos:\n${nuevosDatos}\n\nUn saludo`;const body=encodeURIComponent(bodyText);window.location.href=`mailto:tsrdesoporte@mapfre.com?subject=${subject}&body=${body}`}
-function toggleOpcionesImagen(){const tipoImagen=document.getElementById("tipoImagen")?.value;const opcionesRotulacion=document.getElementById("opcionesRotulacion");const opcionesRopa=document.getElementById("opcionesRopa");const opcionesCarnes=document.getElementById("opcionesCarnes");if(opcionesRotulacion)opcionesRotulacion.style.display="none";if(opcionesRopa)opcionesRopa.style.display="none";if(opcionesCarnes)opcionesCarnes.style.display="none";if(tipoImagen==="Rotulación"&&opcionesRotulacion){opcionesRotulacion.style.display="block"}else if(tipoImagen==="Ropa de Trabajo"&&opcionesRopa){opcionesRopa.style.display="block"}else if(tipoImagen==="Carnés"&&opcionesCarnes){opcionesCarnes.style.display="block"}}
-function enviarFormularioImagen(){const numProf=document.getElementById("numProfImagen")?.value;const tipoImagen=document.getElementById("tipoImagen")?.value;if(!numProf||!numProf.trim()){alert("Por favor, completa el campo Nº Profesional.");return}if(!tipoImagen){alert("Por favor, selecciona el tipo de gestión.");return}let subjectText="";let bodyText="";if(tipoImagen==="Rotulación"){const matriculas=document.getElementById("matriculas")?.value;if(!matriculas||!matriculas.trim()){alert("Por favor, completa el campo Matrícula/s.");return}subjectText=`Rotulación - ${numProf}`;bodyText=`IMPORTANTE: Adjunta Plantilla Solicitud Rotulación\n\nBuenos días,\n\nNº Profesional: ${numProf}\nMatrícula/s: ${matriculas}\n\nUn saludo`}else if(tipoImagen==="Ropa de Trabajo"){const consulta=document.getElementById("consultaRopa")?.value;if(!consulta||!consulta.trim()){alert("Por favor, describe la consulta.");return}subjectText=`Ropa de Trabajo - ${numProf}`;bodyText=`Buenos días,\n\nNº Profesional: ${numProf}\n\nConsulta:\n${consulta}\n\nUn saludo`}else if(tipoImagen==="Carnés"){const detalles=document.getElementById("detallesCarnes")?.value;if(!detalles||!detalles.trim()){alert("Por favor, completa los detalles de los carnés.");return}subjectText=`Carnés - ${numProf}`;bodyText=`Buenos días,\n\nNº Profesional: ${numProf}\n\n${detalles}\n\nUn saludo`}const subject=encodeURIComponent(subjectText);const body=encodeURIComponent(bodyText);window.location.href=`mailto:tsrdesoporte@mapfre.com?subject=${subject}&body=${body}`}
-function enviarFormularioDocumentacion(){const numProf=document.getElementById("numProfDoc")?.value||"";const tipoConsulta=document.getElementById("tipoConsultaDoc")?.value;const detalle=document.getElementById("detalleDoc")?.value;if(!tipoConsulta){alert("Por favor, selecciona el tipo de consulta.");return}if(!detalle||!detalle.trim()){alert("Por favor, completa el campo Detalla consulta / incidencia.");return}const subjectText=numProf.trim()?`${tipoConsulta} - ${numProf}`:tipoConsulta;const subject=encodeURIComponent(subjectText);const bodyText=`Buenos días,\n\n${numProf.trim()?`Nº Profesional: ${numProf}\n\n`:""}${detalle}\n\nENLACE A VIDEO https://youtu.be/D3wi7M0QjGE\n\nUn saludo`;const body=encodeURIComponent(bodyText);window.location.href=`mailto:tsrdesoporte@mapfre.com?subject=${subject}&body=${body}`}
-function enviarFormularioLegal(){const detalle=document.getElementById("detalleLegal")?.value;if(!detalle||!detalle.trim()){alert("Por favor, completa la descripción de la solicitud o incidencia.");return}const subject=encodeURIComponent("CONSULTA LEGAL");const bodyText=`Buenos días,\n\n${detalle}\n\nUn saludo`;const body=encodeURIComponent(bodyText);window.location.href=`mailto:tsrdesoporte@mapfre.com?subject=${subject}&body=${body}`}
-function enviarFormularioAplicaciones(){const numProf=document.getElementById("numProfApp")?.value||"";const descripcion=document.getElementById("descripcionApp")?.value;if(!descripcion||!descripcion.trim()){alert("Por favor, completa el campo Descripción incidencia.");return}const subjectText=numProf.trim()?`Incidencia Aplicaciones - ${numProf}`:"Incidencia Aplicaciones";const subject=encodeURIComponent(subjectText);const bodyText=`Buenos días,\n\n${numProf.trim()?`Nº Profesional: ${numProf}\n\n`:""}${descripcion}\n\nUn saludo`;const body=encodeURIComponent(bodyText);window.location.href=`mailto:tsrdesoporte@mapfre.com?subject=${subject}&body=${body}`}
-function enviarFormularioFormacion(){const numProf=document.getElementById("numProfForm")?.value;const detalles=document.getElementById("detallesForm")?.value;if(!numProf||!numProf.trim()){alert("Por favor, completa el campo Nº Profesional/es.");return}if(!detalles||!detalles.trim()){alert("Por favor, completa la descripción de necesidades y detalles.");return}const subjectText=`FORMACIÓN RECICLAJE - ${numProf}`;const subject=encodeURIComponent(subjectText);const bodyText=`Buenos días,\n\nNº Profesional/es: ${numProf}\n\n${detalles}\n\nUn saludo`;const body=encodeURIComponent(bodyText);window.location.href=`mailto:rrubiom@mapfre.com?subject=${subject}&body=${body}`}
-function enviarFormularioRedComercial(){const subjectText="RED COMERCIAL";const subject=encodeURIComponent(subjectText);const bodyText=`INFORMACIÓN RELEVANTE:
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+const templates = [
+    {
+        id: 1,
+        title: "Dudas Técnicas / Cobertura",
+        description: "Cuestiones relacionadas con coberturas y aplicación de las garantías contratadas. Asesoramiento técnico. Para autorizaciones de LN/ RX o cuestiones técnicas específicas realizar videollamada.",
+        fields: [
+            { name: "numProfesional", label: "Nº Profesional o NIF", type: "text", required: true },
+            { name: "expediente", label: "Número de expediente", type: "text", required: true },
+            { name: "duda", label: "Descripción de la duda técnica", type: "textarea", required: true }
+        ],
+        emailTemplate: (data) => `Asunto: [${data.numProfesional}] Consulta Técnica - Expediente ${data.expediente}
 
-Este canal es exclusivo para consultas o incidencias que relacionadas con la intervención de proveedores patrimoniales.
+Estimado equipo de TSR Soporte,
 
-Evita duplicar gestiones. No envíes correos si recientemente has reclamado a través de GESCOM.
+Me pongo en contacto con vosotros para realizar una consulta técnica sobre cobertura.
 
-En correos a Soporte no incluyas a otros destinatarios en el PARA.
+Nº Profesional/NIF: ${data.numProfesional}
+Expediente: ${data.expediente}
 
-No incluyas a Soporte en CC
+Consulta:
+${data.duda}
 
-No envíes correos a Soporte correos meramente informativos o incluyas en hilos de correos gestionados por otros.
+Quedo a la espera de vuestra respuesta.
 
-Mantén en el asunto automático del correo "RED COMERCIAL - Número de expediente
+Saludos cordiales.`
+    },
+    {
+        id: 2,
+        title: "Solicitud Alta / Baja",
+        description: "Para cese temporal de actividad: motivos siempre genéricos, sin detalles.",
+        fields: [
+            { name: "numProfesional", label: "Nº Profesional o NIF", type: "text", required: true },
+            { name: "tipo", label: "Tipo de solicitud", type: "select", options: ["Alta", "Baja"], required: true },
+            { name: "fechaInicio", label: "Fecha de inicio", type: "date", required: true },
+            { name: "fechaFin", label: "Fecha de fin", type: "date", required: false },
+            { name: "motivo", label: "Motivo", type: "select", options: ["Alta", "Motivos Personales", "Vacaciones", "Enfermedad/Accidente", "Saturación", "Cambio de Razón Social", "Sin Vehículo", "Fin de Colaboración/jubilación"], required: true }
+        ],
+        emailTemplate: (data) => `Asunto: [${data.numProfesional}] Solicitud de ${data.tipo} - Cese temporal de actividad
 
----
+Estimado equipo de TSR Soporte,
 
-Estimado equipo Soporte:
+Solicito tramitar una ${data.tipo.toLowerCase()}.
 
-Expediente/s Nº:
+Nº Profesional/NIF: ${data.numProfesional}
+Fecha de inicio: ${data.fechaInicio}
+${data.fechaFin ? `Fecha de fin: ${data.fechaFin}` : 'Fecha de fin: A determinar'}
 
-Descripción de consulta / incidencia:
+Motivo: ${data.motivo}
+
+Quedo a la espera de confirmación.
+
+Saludos cordiales.`
+    },
+    {
+        id: 3,
+        title: "Incidencias en Importes / Facturaciones / Embargos",
+        description: "Posibles errores, incidencias en tus devoluciones relacionadas con importes o aplicación de tarifas. Incidencias en facturaciones y sus pagos. Consultas de embargos.",
+        fields: [
+            { name: "numProfesional", label: "Nº Profesional o NIF", type: "text", required: true },
+            { name: "tipoIncidencia", label: "Tipo de incidencia", type: "select", options: ["Error en importe", "Facturación incorrecta", "Consulta embargo", "Devolución","Otra consulta"], required: true },
+            { name: "numeroFactura", label: "Número de factura / Nº expediente", type: "text", required: false },
+            { name: "descripcion", label: "Descripción detallada", type: "textarea", required: true }
+        ],
+        emailTemplate: (data) => `Asunto: [${data.numProfesional}] Incidencia - ${data.tipoIncidencia}
+
+Estimado equipo de TSR Soporte,
+
+Me pongo en contacto para reportar una incidencia:
+
+Nº Profesional/NIF: ${data.numProfesional}
+Tipo: ${data.tipoIncidencia}
+${data.numeroFactura ? `Referencia: ${data.numeroFactura}` : ''}
+
+Descripción:
+${data.descripcion}
+
+Agradezco vuestra pronta atención.
+
+Saludos cordiales.`
+    },
+    {
+        id: 4,
+        title: "Gestión de Servicios",
+        description: "Servicios mal cerrados o por error. Recuperación servicios pendiente de cliente. Recordad que deben intentar contactar antes con BGP (Batería Gestión Proveedores 918 366 128 / 675 948 365)",
+        fields: [
+            { name: "numProfesional", label: "Nº Profesional o NIF", type: "text", required: true },
+            { name: "numeroExpediente", label: "Número de expediente", type: "text", required: true },
+            { name: "tipoGestion", label: "Tipo de gestión", type: "select", options: ["Servicio mal cerrado", "Recuperación pendiente"], required: true },
+            { name: "detalles", label: "Detalles del servicio", type: "textarea", required: true }
+        ],
+        emailTemplate: (data) => `Asunto: [${data.numProfesional}] Gestión de Servicio - Expediente ${data.numeroExpediente}
+
+Estimado equipo de TSR Soporte,
+
+Solicito gestión del siguiente servicio:
+
+Nº Profesional/NIF: ${data.numProfesional}
+Expediente: ${data.numeroExpediente}
+Tipo: ${data.tipoGestion}
+
+Detalles:
+${data.detalles}
+
+Quedo pendiente de vuestra gestión.
+
+Saludos cordiales.`
+    },
+    {
+        id: 5,
+        title: "Modificar Datos Personales",
+        description: "Mantén actualizados tus datos. Recuerda que para datos telefónicos hay un número móvil general (también es el de urgencias por Whatsapp), tfno para urgencias laborales de 8 a 19 y tfno para guardia (laborales de 19 a 8, fines de semana y festivos).",
+        fields: [
+            { name: "numProfesional", label: "Nº Profesional o NIF", type: "text", required: true },
+            { name: "datosActualizar", label: "Datos a actualizar", type: "select", options: ["Teléfono (móvil, urgencias y guardia)", "Email", "Dirección", "Cuenta bancaria", "Varios"], required: true },
+            { name: "datosNuevos", label: "Nuevos datos", type: "textarea", required: true },
+            { name: "certificado", label: "Certificado titularidad banco (OBLIGATORIO si es Cuenta bancaria)", type: "select", options: ["Sí, adjunto", "No aplica"], required: false }
+        ],
+        emailTemplate: (data) => `Asunto: [${data.numProfesional}] Modificación de Datos Personales
+
+Estimado equipo de TSR Soporte,
+
+Solicito la actualización de mis datos personales:
+
+Nº Profesional/NIF: ${data.numProfesional}
+Datos a modificar: ${data.datosActualizar}
+
+Nuevos datos:
+${data.datosNuevos}
+
+${data.certificado && data.certificado === "Sí, adjunto" ? `Certificado de titularidad bancaria: Adjunto` : ''}
+
+Gracias por vuestra gestión.
+
+Saludos cordiales.`
+    },
+    {
+        id: 6,
+        title: "Cambiar Guardia",
+        description: "Salvo que sea inminente y de causa inexcusable no se pueden llevar a cabo cambios sin informar previamente a tu TSR",
+        fields: [
+            { name: "numProfesional", label: "Nº Profesional", type: "text", required: true },
+            { name: "fechaInicio", label: "Fecha inicio guardia", type: "date", required: true },
+            { name: "fechaFin", label: "Fecha fin guardia", type: "date", required: true },
+            { name: "actividades", label: "Actividades", type: "text", required: true },
+            { name: "zonas", label: "Zonas", type: "text", required: true },
+            { name: "sustituto", label: "Sustituto propuesto", type: "text", required: true },
+            { name: "motivo", label: "Motivo del cambio", type: "textarea", required: true }
+        ],
+        emailTemplate: (data) => `Asunto: [${data.numProfesional}] Solicitud de Cambio de Guardia
+
+Estimado equipo de TSR Soporte,
+
+Solicito cambio de guardia con los siguientes datos:
+
+Nº Profesional/NIF: ${data.numProfesional}
+Período original: Del ${data.fechaInicio} al ${data.fechaFin}
+Actividades: ${data.actividades}
+Zonas: ${data.zonas}
+Sustituto propuesto: ${data.sustituto}
+
+Motivo:
+${data.motivo}
+
+Quedo pendiente de confirmación.
+
+Saludos cordiales.`
+    },
+    {
+        id: 7,
+        title: "Consulta uso o Incidencia Appcol/Infocol",
+        description: "Ante problemas de acceso o funcionamiento, contacta primero con el SAU (915814900) y comunica la incidencia. Si es de Appcol, envía los LOGS (accede en ajustes, versión). Para agilizar la resolución, indica el número SD que te dará el SAU junto con la descripción del problema.",
+        fields: [
+            { name: "numProfesional", label: "Nº Profesional o NIF", type: "text", required: true },
+            { name: "tipoConsulta", label: "Tipo", type: "select", options: ["Incidencia Appcol", "Incidencia Infocol", "Consulta de uso", "Baja usuario / nuuma"], required: true },
+            { name: "numeroSAU", label: "Número SD del SAU (imprescindible)", type: "text", required: true },
+            { name: "descripcionProblema", label: "Descripción del problema", type: "textarea", required: true },
+            { name: "logsEnviados", label: "¿Has enviado LOGS? (si es Appcol)", type: "select", options: ["Sí", "No", "No aplica"], required: false }
+        ],
+        emailTemplate: (data) => `Asunto: [${data.numProfesional}] ${data.tipoConsulta} - Número SD: ${data.numeroSAU}
+
+Estimado equipo de TSR Soporte,
+
+Reporto la siguiente incidencia:
+
+Nº Profesional/NIF: ${data.numProfesional}
+Tipo: ${data.tipoConsulta}
+Número SD del SAU: ${data.numeroSAU}
+${data.logsEnviados && data.logsEnviados !== "No aplica" ? `LOGS enviados: ${data.logsEnviados}` : ''}
+
+Descripción del problema:
+${data.descripcionProblema}
 
 
-Un saludo`;const body=encodeURIComponent(bodyText);window.location.href=`mailto:?subject=${subject}&body=${body}`}
-function establecerFechasMinimas(){const hoy=new Date().toISOString().split('T')[0];const fechaInputs=document.querySelectorAll('input[type="date"]');fechaInputs.forEach(input=>{input.setAttribute('min',hoy)})}
-function showList(){document.getElementById("listView").classList.remove("hidden"),document.getElementById("detailView").classList.add("hidden"),currentView="list",renderList()}
-document.getElementById("searchInput").addEventListener("input",e=>{const t=e.target.value.toLowerCase();filteredGestiones=gestiones.filter(e=>e.tipo.toLowerCase().includes(t)||e.destinatario.toLowerCase().includes(t)||e.descripcion.toLowerCase().includes(t)),"list"===currentView&&renderList()}),renderList();
-const observer=new MutationObserver(establecerFechasMinimas);observer.observe(document.body,{childList:true,subtree:true});establecerFechasMinimas();
-    </script>
+Quedo a la espera de vuestra ayuda.
 
-    <!-- Service Worker para PWA -->
-    <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('Service Worker registrado'))
-                .catch(err => console.log('Error en Service Worker:', err));
-        });
+Saludos cordiales.`
+    },
+    {
+        id: 8,
+        title: "Rotulación Vehículo / Carnés / Incidencias Compra Ropa",
+        description: "Para solicitar rotulación es imprescindible que el vehículo sea blanco, esté en buen estado y asegurado en MAPFRE/ VERTI (adjuntar póliza y recibo)",
+        fields: [
+            { name: "numProfesional", label: "Nº Profesional o NIF", type: "text", required: true },
+            { name: "tipoSolicitud", label: "Tipo de solicitud", type: "select", options: ["Rotulación vehículo", "Carnés", "Puentes", "Compra ropa"], required: true },
+            { name: "detalles", label: "Detalles de la solicitud", type: "textarea", required: true },
+            { name: "vehiculoBlanco", label: "Vehículo blanco (si aplica)", type: "select", options: ["Sí", "No", "No aplica"], required: false },
+            { name: "buenEstado", label: "Buen estado (si aplica)", type: "select", options: ["Sí", "No", "No aplica"], required: false },
+            { name: "seguroAdjunto", label: "¿Adjuntas póliza y recibo? (si aplica)", type: "select", options: ["Sí", "No", "No aplica"], required: false }
+        ],
+        emailTemplate: (data) => `Asunto: [${data.numProfesional}] Solicitud - ${data.tipoSolicitud}
+
+Estimado equipo de TSR Soporte,
+
+Solicito gestión de:
+
+Nº Profesional/NIF: ${data.numProfesional}
+Tipo: ${data.tipoSolicitud}
+
+${data.vehiculoBlanco && data.vehiculoBlanco !== "No aplica" ? `Vehículo blanco: ${data.vehiculoBlanco}` : ''}
+${data.buenEstado && data.buenEstado !== "No aplica" ? `Buen estado: ${data.buenEstado}` : ''}
+${data.seguroAdjunto && data.seguroAdjunto !== "No aplica" ? `Documentación adjunta: ${data.seguroAdjunto}` : ''}
+
+Detalles:
+${data.detalles}
+
+Gracias por vuestra atención.
+
+Saludos cordiales.`
+    },
+    {
+        id: 9,
+        title: "Gestión de Documentación CAE/PRL - 6Conecta",
+        description: "Si son problemas de acceso entra en www. 6conecta.com. Si tienes dudas de uso te recomendamos revisar guía y video. Si tienes incidencia con la validación de un documento revisa motivos en el documento en la pestaña CAMBIOS",
+        fields: [
+            { name: "numProfesional", label: "Nº Profesional o NIF", type: "text", required: true },
+            { name: "tipoGestion", label: "Tipo de gestión", type: "select", options: ["Problema de acceso", "Solicito guía y video", "Duda de uso", "Validación/rechazo de documentos", "Otra incidencia"], required: true },
+            { name: "descripcion", label: "Descripción", type: "textarea", required: true }
+        ],
+        emailTemplate: (data) => `Asunto: [${data.numProfesional}] Gestión Documentación - ${data.tipoGestion}
+
+Estimado equipo de TSR Soporte,
+
+Necesito ayuda con la gestión de documentación:
+
+Nº Profesional/NIF: ${data.numProfesional}
+Tipo: ${data.tipoGestion}
+
+Descripción:
+${data.descripcion}
+
+${data.tipoGestion === "Problema de acceso" ? "He verificado el acceso a www.6conecta.com previamente." : ""}
+
+Agradezco vuestra asistencia.
+
+Saludos cordiales.`
+    },
+    {
+        id: 10,
+        title: "Tu Experiencia Nos Importa",
+        description: "Este espacio está pensado para que compartas tus comentarios sobre la atención recibida. Tu opinión nos ayuda a mejorar nuestros servicios y ofrecerte una mejor experiencia.Si has tenido alguna incidencia con Batería de Profesionales, Tramitación o TSR informa. Es imprescindible día / hora aproximada, el departamento y nombre de la persona que te ha atendido.",
+        fields: [
+            { name: "numProfesional", label: "Nº Profesional o NIF", type: "text", required: true },
+            { name: "fecha", label: "Fecha de la incidencia", type: "date", required: true },
+            { name: "hora", label: "Hora aproximada", type: "time", required: true },
+            { name: "nombrePersona", label: "Nombre de quien atendió", type: "text", required: true },
+            { name: "descripcion", label: "Descripción de la incidencia", type: "textarea", required: true }
+        ],
+        emailTemplate: (data) => `Asunto: [${data.numProfesional}] Incidencia con Batería de Profesionales
+
+Estimado equipo de TSR Soporte,
+
+Les informo que:
+
+Nº Profesional/NIF: ${data.numProfesional}
+Fecha: ${data.fecha}
+Hora: ${data.hora}
+Persona que atendió: ${data.nombrePersona}
+
+Descripción:
+${data.descripcion}
+
+Gracias por vuestra atención en la mejora del servicio.
+
+Saludos cordiales.`
+    },
+    {
+        id: 11,
+        title: "Cliente Solicita Reenvío de Presupuesto",
+        description: "Si un cliente reclama presupuesto nos lo puedes solicitar, recuerda incluir el nº de expediente",
+        fields: [
+            { name: "numProfesional", label: "Nº Profesional o NIF", type: "text", required: true },
+            { name: "numeroExpediente", label: "Número de expediente", type: "text", required: true },
+            { name: "datosCliente", label: "Algún dato adicional del cliente como nombre, dirección, teléfono o email solo si dispones de ellos", type: "textarea", required: false }
+        ],
+        emailTemplate: (data) => `Asunto: [${data.numProfesional}] Reenvío de Presupuesto - Expediente ${data.numeroExpediente}
+
+Estimado equipo de TSR Soporte,
+
+El cliente solicita reenvío del presupuesto ofertado:
+
+Nº Profesional/NIF: ${data.numProfesional}
+Expediente: ${data.numeroExpediente}
+${data.datosCliente ? `Datos del cliente: ${data.datosCliente}` : ''}
+
+Agradezco el reenvío a la mayor brevedad.
+
+Saludos cordiales.`
+    },
+    {
+        id: 12,
+        title: "Otros",
+        description: "Este supuesto solo lo debes usar cuando ninguno de los anteriores encaja en lo que precisas. Debe ser muy expecional.",
+        fields: [
+            { name: "numProfesional", label: "Nº Profesional o NIF", type: "text", required: true },
+            { name: "asunto", label: "Asunto", type: "text", required: true },
+            { name: "mensaje", label: "Mensaje detallado", type: "textarea", required: true }
+        ],
+        emailTemplate: (data) => `Asunto: [${data.numProfesional}] ${data.asunto}
+
+Estimado equipo de TSR Soporte,
+
+Nº Profesional/NIF: ${data.numProfesional}
+
+${data.mensaje}
+
+Saludos cordiales.`
     }
-    </script>
+];
 
-</body>
-</html>
+function createCards() {
+    const container = document.getElementById('cardsContainer');
+    templates.forEach(template => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <div class="card-title">${template.title}</div>
+            <div class="card-description">${template.description}</div>
+            <button class="btn" onclick="openModal(${template.id})">Generar Email</button>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function openModal(templateId) {
+    const template = templates.find(t => t.id === templateId);
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    modalTitle.textContent = template.title;
+    
+    let formHTML = `<div id="emailPreview" style="margin-bottom: 2rem;"></div>`;
+    formHTML += `<div class="info-banner"><strong>Información:</strong> ${template.description}</div><form id="emailForm" onsubmit="generateEmail(event, ${templateId})">`;
+    template.fields.forEach(field => {
+        formHTML += `<div class="form-group"><label class="form-label">${field.label}${field.required ? ' *' : ''}</label>`;
+        if (field.type === 'textarea') {
+            formHTML += `<textarea class="form-textarea" name="${field.name}" ${field.required ? 'required' : ''}></textarea>`;
+        } else if (field.type === 'select') {
+            formHTML += `<select class="form-input" name="${field.name}" ${field.required ? 'required' : ''}><option value="">Selecciona una opción</option>`;
+            field.options.forEach(opt => { formHTML += `<option value="${opt}">${opt}</option>`; });
+            formHTML += `</select>`;
+        } else {
+            const minDate = field.type === 'date' ? ` min="${new Date().toISOString().split('T')[0]}"` : '';
+            formHTML += `<input type="${field.type}" class="form-input" name="${field.name}" ${field.required ? 'required' : ''}${minDate}>`;
+        }
+        formHTML += `</div>`;
+    });
+    formHTML += `<div class="button-group"><button type="submit" class="btn">Generar Email</button><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button></div></form>`;
+    modalBody.innerHTML = formHTML;
+    modal.style.display = 'block';
+}
+
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+function buscarPlantillas() {
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.card');
+    const searchResults = document.getElementById('searchResults');
+    let visibleCount = 0;
+    
+    cards.forEach(card => {
+        const title = card.querySelector('.card-title').textContent.toLowerCase();
+        const description = card.querySelector('.card-description').textContent.toLowerCase();
+        
+        if (title.includes(searchInput) || description.includes(searchInput)) {
+            card.style.display = 'flex';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Mostrar contador de resultados
+    if (searchInput === '') {
+        searchResults.textContent = '';
+    } else if (visibleCount === 0) {
+        searchResults.textContent = '❌ No se encontraron plantillas';
+        searchResults.style.color = '#E44E59';
+    } else {
+        searchResults.textContent = `✓ ${visibleCount} plantilla${visibleCount !== 1 ? 's' : ''} encontrada${visibleCount !== 1 ? 's' : ''}`;
+        searchResults.style.color = '#4CAF50';
+    }
+}
+
+function mostrarInstruccionesInstalar() {
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    
+    modalTitle.textContent = '📱 Instalar la app';
+    
+    const appleSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#C0C0C0" style="vertical-align: middle; margin-right: 0.5rem;"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>';
+    
+    modalBody.innerHTML = `
+        <div style="font-size: 1rem; line-height: 2; color: #ffffff;">
+            <p style="margin-bottom: 1.5rem;">
+                <strong style="color: #4CAF50;">🤖 Android (Chrome)</strong><br>
+                Abre la URL → menú ⋮ → "Añadir a pantalla de inicio"
+            </p>
+            
+            <p style="margin-bottom: 1.5rem;">
+                <strong style="color: #FFFFFF;">${appleSvg}iOS (Safari)</strong><br>
+                Abre la URL → botón compartir <span style="font-size: 1.3rem;">□↑</span> → "Añadir a pantalla de inicio"
+            </p>
+            
+            <p style="margin-bottom: 1.5rem;">
+                <strong style="color: #00A4EF;">🖥️ PC (Chrome / Edge)</strong><br>
+                Abre la URL → icono ⊕ en la barra de direcciones → "Instalar"
+            </p>
+            
+            <hr style="border: none; border-top: 1px solid #404040; margin: 1.5rem 0;">
+            
+            <p style="margin: 0; color: #b8b8b8; font-size: 0.95rem;">
+                <strong>💡</strong> La app funciona sin conexión después de la primera carga
+            </p>
+        </div>
+    `;
+    
+    modal.style.display = 'flex';
+}
+
+function generateEmail(event, templateId) {
+    event.preventDefault();
+    const template = templates.find(t => t.id === templateId);
+    const form = event.target;
+    const formData = new FormData(form);
+    const data = {};
+    for (let [key, value] of formData.entries()) { data[key] = value; }
+    if (templateId === 5 && data.datosActualizar === "Cuenta bancaria") {
+        if (!data.certificado || data.certificado === "No aplica") {
+            alert('ATENCIÓN: Para modificar Cuenta bancaria es OBLIGATORIO adjuntar el Certificado de titularidad bancaria. Por favor, selecciona "Sí, adjunto".');
+            return;
+        }
+    }
+    const emailContent = template.emailTemplate(data);
+    const previewDiv = document.getElementById('emailPreview');
+    
+    const emailHTML = emailContent.replace(/\n/g, '<br>');
+    const encodedEmail = encodeURIComponent(emailContent);
+    
+    let previewHTML = '';
+    previewHTML += '<div style="background: linear-gradient(135deg, rgba(228, 78, 89, 0.15), rgba(199, 61, 71, 0.1)); border: 2px solid #E44E59; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">';
+    previewHTML += '<h3 style="color: #E44E59; margin-bottom: 1rem; font-size: 1.4rem;">✓ Email Generado - Vista Previa</h3>';
+    previewHTML += '<div class="email-preview" style="margin-bottom: 1rem;">' + emailHTML + '</div>';
+    previewHTML += '<div class="button-group">';
+    previewHTML += '<button type="button" class="btn btn-icon" onclick="sendEmailNow(\'' + encodedEmail + '\')"><span style="font-size: 2.5em; line-height: 1;">📧</span><span>Genera correo en tu mail</span></button>';
+    previewHTML += '<button type="button" class="btn btn-secondary btn-icon" onclick="copyEmailNow()"><span style="font-size: 2.5em; line-height: 1;">📋</span><span>Si no se abre tu email copiar y pegar manual</span></button>';
+    previewHTML += '</div></div>';
+    
+    previewDiv.innerHTML = previewHTML;
+    
+    // Store email for copy function
+    window.currentEmail = emailContent;
+    
+    const modalContent = document.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.scrollTop = 0;
+    }
+}
+
+function sendEmail(encodedContent) {
+    const content = decodeURIComponent(encodedContent);
+    const subject = content.split('\n')[0].replace('Asunto: ', '');
+    const body = content.split('\n').slice(2).join('\n');
+    const mailtoLink = 'mailto:tsrdesoporte@mapfre.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    window.location.href = mailtoLink;
+}
+
+function sendEmailNow(encodedContent) {
+    sendEmail(encodedContent);
+}
+
+function copyEmailNow() {
+    const text = window.currentEmail;
+    if (!text) {
+        alert('No hay email para copiar');
+        return;
+    }
+    
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    
+    try {
+        document.execCommand('copy');
+        alert('Email copiado al portapapeles correctamente');
+    } catch (err) {
+        console.error('Error al copiar:', err);
+        
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Email copiado al portapapeles');
+            }).catch(function(err) {
+                alert('No se pudo copiar al portapapeles');
+            });
+        } else {
+            alert('No se pudo copiar al portapapeles');
+        }
+    }
+    
+    document.body.removeChild(textarea);
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => { alert('Email copiado al portapapeles'); }).catch(err => { console.error('Error al copiar:', err); });
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('modal');
+    if (event.target === modal) { closeModal(); }
+}
+
+document.addEventListener('DOMContentLoaded', createCards);
+</script>
+<script>
+// Registro del Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw
