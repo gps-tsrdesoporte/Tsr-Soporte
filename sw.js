@@ -1,5 +1,5 @@
 // Service Worker para TSR Soporte
-const CACHE_NAME = 'tsr-soporte-v1';
+const CACHE_NAME = 'tsr-soporte-v2';
 const urlsToCache = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const urlsToCache = [
 
 // Instalación del Service Worker
 self.addEventListener('install', event => {
+  self.skipWaiting(); // Activa el nuevo SW inmediatamente
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -31,7 +32,7 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim()) // Toma control de las pestañas abiertas
   );
 });
 
