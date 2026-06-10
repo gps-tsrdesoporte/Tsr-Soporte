@@ -321,20 +321,20 @@ Saludos cordiales.`
     },
     {
         id: 2,
-        title: "Solicitud Alta / Baja",
-        description: "Para cese temporal de actividad: motivos siempre genéricos, sin detalles.",
+        title: "Solicitud Cese Temporal Actividad / Reanudación Actividad",
+        description: "Te recordamos que puedes auto reactivar tu actividad en cualquier momento seleccionando tus códigos de profesional a través del icono 🛄 en tu Appcol",
         fields: [
             { name: "numProfesional", label: "Nº Profesional o NIF", type: "text", required: true },
-            { name: "tipo", label: "Tipo de solicitud", type: "select", options: ["Alta", "Baja"], required: true },
+            { name: "tipo", label: "Tipo de solicitud", type: "select", options: ["Cese Temporal Actividad", "Reanudación Actividad"], required: true },
             { name: "fechaInicio", label: "Fecha de inicio", type: "date", required: true },
             { name: "fechaFin", label: "Fecha de fin", type: "date", required: false },
-            { name: "motivo", label: "Motivo", type: "select", options: ["Alta", "Motivos Personales", "Vacaciones", "Enfermedad/Accidente", "Saturación", "Cambio de Razón Social", "Sin Vehículo", "Fin de Colaboración/jubilación"], required: true }
+            { name: "motivo", label: "Motivo", type: "select", options: ["Reanudación Actividad", "Motivos Personales", "Vacaciones", "Enfermedad/Accidente", "Saturación", "Cambio de Razón Social", "Sin Vehículo", "Fin de Colaboración/jubilación"], required: true }
         ],
-        emailTemplate: (data) => `Asunto: [${data.numProfesional}] Solicitud de ${data.tipo} - Cese temporal de actividad
+        emailTemplate: (data) => `Asunto: [${data.numProfesional}] ${data.tipo === 'Cese Temporal Actividad' ? 'Cese actividad' : 'Reanudación actividad'}
 
 Estimado equipo de TSR Soporte,
 
-Solicito tramitar una ${data.tipo.toLowerCase()}.
+${data.tipo === 'Cese Temporal Actividad' ? 'Solicito tramitar el cese temporal de mi actividad.' : 'Solicito tramitar la reanudación de mi actividad.'}
 
 Nº Profesional/NIF: ${data.numProfesional}
 Fecha de inicio: ${data.fechaInicio}
@@ -746,7 +746,8 @@ function generateEmail(event, templateId) {
             return;
         }
     }
-    const emailContent = template.emailTemplate(data);
+    let emailContent = template.emailTemplate(data);
+    emailContent = emailContent.replace('Asunto: ', 'Asunto: GC#- ');
     const previewDiv = document.getElementById('emailPreview');
     
     const emailHTML = emailContent.replace(/\n/g, '<br>');
